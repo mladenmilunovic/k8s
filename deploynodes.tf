@@ -145,6 +145,11 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     vm_size               = "Standard_D2ds_v4"
     // for exchange Standard_D4ds_v4
     
+    admin_ssh_key {
+        username       = "mladen"
+        public_key     = tls_private_key.example_ssh.public_key_openssh
+    }
+
     storage_os_disk {
         name              = format("OsDisk-${var.vmname}%02d", count.index + 1)
         caching           = "ReadWrite"
@@ -166,11 +171,6 @@ resource "azurerm_virtual_machine" "myterraformvm" {
 
     os_profile_linux_config {
         disable_password_authentication = true
-    }
-
-    admin_ssh_key {
-        username       = "mladen"
-        public_key     = tls_private_key.example_ssh.public_key_openssh
     }
 
     boot_diagnostics {
