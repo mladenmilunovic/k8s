@@ -54,7 +54,7 @@ resource "azurerm_subnet" "devopssubnet" {
 // }
 
 # Create Network Security Group and rule
-resource "azurerm_network_security_group" "myterraformnsg" {
+resource "azurerm_network_security_group" "devopsnsg" {
     name                = "devopsNetworkSecurityGroup"
     location            = "westeurope"
     resource_group_name = "${azurerm_resource_group.devopsgroup.name}"
@@ -79,7 +79,7 @@ resource "azurerm_network_security_group" "myterraformnsg" {
 #Associate NSG to subnet
 resource "azurerm_subnet_network_security_group_association" "mynsg" {
   subnet_id                 = "${azurerm_subnet.devopssubnet.id}"
-  network_security_group_id = "${azurerm_network_security_group.myterraformnsg.id}"
+  network_security_group_id = "${azurerm_network_security_group.devopsnsg.id}"
 }
 
 # Create network interface
@@ -115,7 +115,7 @@ resource "random_id" "randomId" {
 }
 
 # Create storage account for boot diagnostics 
-resource "azurerm_storage_account" "mystorageaccount" {
+resource "azurerm_storage_account" "devopstorageaccount" {
     name                        = "diag${random_id.randomId.hex}"
     resource_group_name         = "${azurerm_resource_group.devopsgroup.name}"
     location                    = "westeurope"
@@ -136,13 +136,15 @@ output "tls_private_key" { value = tls_private_key.example_ssh.private_key_pem }
 
 
 # Create virtual machine
-resource "azurerm_linux_virtual_machine" "myterraformvm" {
+resource "azurerm_linux_virtual_machine" "devopsvm" {
     count = "${var.countvalue}"
     name                  = format("${var.vmname}%02d", count.index + 1)
     location              = "westeurope"
     resource_group_name   = "${azurerm_resource_group.devopsgroup.name}"
     network_interface_ids = ["${element(azurerm_network_interface.myterraformnic.*.id, count.index)}"]
+
     size                  = "Standard_D2ds_v4"
+    
     computer_name  = format("${var.vmname}%02d", count.index + 1)
     admin_username = "mladen"
     disable_password_authentication = true
@@ -171,7 +173,7 @@ resource "azurerm_linux_virtual_machine" "myterraformvm" {
     }
 
     boot_diagnostics {
-        storage_account_uri = "${azurerm_storage_account.mystorageaccount.primary_blob_endpoint}"
+        storage_account_uri = "${azurerm_storage_account.devopstorageaccount.primary_blob_endpoint}"
     }
 
     tags = {
