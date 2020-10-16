@@ -136,41 +136,34 @@ output "tls_private_key" { value = tls_private_key.example_ssh.private_key_pem }
 
 
 # Create virtual machine
-resource "azurerm_virtual_machine" "myterraformvm" {
+resource "azurerm_linux_virtual_machine" "myterraformvm" {
     count = "${var.countvalue}"
     name                  = format("${var.vmname}%02d", count.index + 1)
     location              = "westeurope"
     resource_group_name   = "${azurerm_resource_group.k8sgroup.name}"
     network_interface_ids = ["${element(azurerm_network_interface.myterraformnic.*.id, count.index)}"]
-    vm_size               = "Standard_D2ds_v4"
-    // for exchange Standard_D4ds_v4
-    
+    size                  = "Standard_D2ds_v4"
+    computer_name  = format("${var.vmname}%02d", count.index + 1)
+    admin_username = "mladen"
+    disable_password_authentication = true
+
     admin_ssh_key {
-        username       = "root"
+        username       = "mladen"
         public_key     = tls_private_key.example_ssh.public_key_openssh
     }
 
-    storage_os_disk {
+    os_disk {
         name              = format("OsDisk-${var.vmname}%02d", count.index + 1)
         caching           = "ReadWrite"
         create_option     = "FromImage"
         managed_disk_type = "Premium_LRS"
     }
 
-    storage_image_reference {
+    source_image_reference {
         publisher = "Canonical"
         offer     = "UbuntuServer"
         sku       = "18.04-LTS"
         version   = "latest"
-    }
-
-    os_profile {
-        computer_name  = format("${var.vmname}%02d", count.index + 1)
-        admin_username = "root"
-    }
-
-    os_profile_linux_config {
-        disable_password_authentication = true
     }
 
     boot_diagnostics {
