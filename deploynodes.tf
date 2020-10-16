@@ -55,7 +55,7 @@ resource "azurerm_subnet" "k8ssubnet" {
 
 # Create Network Security Group and rule
 resource "azurerm_network_security_group" "myterraformnsg" {
-    name                = "PawNetworkSecurityGroup"
+    name                = "k8sNetworkSecurityGroup"
     location            = "westeurope"
     resource_group_name = "${azurerm_resource_group.k8sgroup.name}"
     
@@ -94,7 +94,7 @@ resource "azurerm_network_interface" "myterraformnic" {
         name                          = format("NicConfiguration-${var.vmname}%02d", count.index + 1)
         subnet_id                     = "${azurerm_subnet.k8ssubnet.id}"
         private_ip_address_allocation = "Static"
-        private_ip_address            = format("10.0.1.%02d", count.index + 21)
+        private_ip_address            = format("10.0.1.%02d", count.index + 11)
         // public_ip_address_id          = "${element(azurerm_public_ip.myterraformpublicip.*.id, count.index)}"
     }
 
