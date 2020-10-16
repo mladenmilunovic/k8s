@@ -159,11 +159,9 @@ resource "azurerm_virtual_machine" "myterraformvm" {
         version   = "latest"
     }
 
-    os_profile {
-        computer_name  = format("${var.vmname}%02d", count.index + 1)
-        admin_username = "mladen"
-        disable_password_authentication = true
-    }
+    computer_name  = format("${var.vmname}%02d", count.index + 1)
+    admin_username = "mladen"
+    disable_password_authentication = true
 
     admin_ssh_key {
         username       = "mladen"
