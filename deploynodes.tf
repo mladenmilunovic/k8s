@@ -136,7 +136,7 @@ output "tls_private_key" { value = tls_private_key.example_ssh.private_key_pem }
 
 
 # Create virtual machine
-resource "azurerm_virtual_machine" "myterraformvm" {
+resource "azurerm_linux_virtual_machine" "k8svm" {
     count = "${var.countvalue}"
     name                  = format("${var.vmname}%02d", count.index + 1)
     location              = "westeurope"
