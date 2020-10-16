@@ -146,7 +146,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     // for exchange Standard_D4ds_v4
     
     admin_ssh_key {
-        username       = "mladen"
+        username       = "root"
         public_key     = tls_private_key.example_ssh.public_key_openssh
     }
 
@@ -166,7 +166,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
 
     os_profile {
         computer_name  = format("${var.vmname}%02d", count.index + 1)
-        admin_username = "mladen"
+        admin_username = "root"
     }
 
     os_profile_linux_config {
