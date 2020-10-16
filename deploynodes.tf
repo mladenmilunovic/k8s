@@ -155,8 +155,7 @@ resource "azurerm_linux_virtual_machine" "myterraformvm" {
     os_disk {
         name              = format("OsDisk-${var.vmname}%02d", count.index + 1)
         caching           = "ReadWrite"
-        create_option     = "FromImage"
-        managed_disk_type = "Premium_LRS"
+        storage_account_type = "Premium_LRS"
     }
 
     source_image_reference {
@@ -167,8 +166,7 @@ resource "azurerm_linux_virtual_machine" "myterraformvm" {
     }
 
     boot_diagnostics {
-        enabled = "true"
-        storage_uri = "${azurerm_storage_account.mystorageaccount.primary_blob_endpoint}"
+        storage_account_uri = "${azurerm_storage_account.mystorageaccount.primary_blob_endpoint}"
     }
 
     tags = {
