@@ -88,7 +88,7 @@ resource "azurerm_network_interface" "myterraformnic" {
     name                      = format("NIC-${var.vmname}%02d", count.index + 1) 
     location                  = "westeurope"
     resource_group_name       = "${azurerm_resource_group.k8sgroup.name}"
-    dns_servers                   = ["10.0.1.10"]
+    #dns_servers                   = ["10.0.1.10"]
 
     ip_configuration {
         name                          = format("NicConfiguration-${var.vmname}%02d", count.index + 1)
