@@ -136,7 +136,7 @@ output "tls_private_key" { value = tls_private_key.example_ssh.private_key_pem }
 
 
 # Create virtual machine
-resource "azurerm_linux_virtual_machine" "k8svm" {
+resource "azurerm_virtual_machine" "myterraformvm" {
     count = "${var.countvalue}"
     name                  = format("${var.vmname}%02d", count.index + 1)
     location              = "westeurope"
@@ -159,9 +159,14 @@ resource "azurerm_linux_virtual_machine" "k8svm" {
         version   = "latest"
     }
 
-    computer_name  = format("${var.vmname}%02d", count.index + 1)
-    admin_username = "mladen"
-    disable_password_authentication = true
+    os_profile {
+        computer_name  = format("${var.vmname}%02d", count.index + 1)
+        admin_username = "mladen"
+    }
+
+    os_profile_linux_config {
+        disable_password_authentication = true
+    }
 
     admin_ssh_key {
         username       = "mladen"
