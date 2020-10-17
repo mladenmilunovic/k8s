@@ -1,0 +1,48 @@
+---
+# performYumUpdateRebootServer.yml
+# # performs yum update and reboots server
+ - name: perform yum update / reboot server
+   hosts: servers
+   remote_user: lnxcfg
+   become: true
+   become_method: sudo
+   become_user: root
+
+   tasks:
+        - name: Disable SELinux
+          ansible.posix.selinux:
+            state: disabled
+
+        - name: Stop and disable firewalld
+          service:
+                  name: firewalld
+                  state: stopped
+                  enabled: False
+
+
+#        - name: be sure firewalld is disabled
+#          systemd: name=firewalld enabled=no
+#
+#        - name: be sure firewalld is stopped
+#          systemd: name=firewalld state=stopped
+#          ignore_errors: yes
+#
+        - name: Enable EPEL Repository on CentOS 7
+          yum:
+               name: epel-release
+               state: latest
+
+        - name: Install Ansible
+          yum:
+            name: ansible
+            state: latest
+
+        - easy_install:
+             name: pip
+             state: latest
+
+
+        - name: Install Python3
+          yum:
+            name: python3
+            state: latest
