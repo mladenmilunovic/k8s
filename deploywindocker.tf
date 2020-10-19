@@ -8,6 +8,10 @@ resource "azurerm_resource_group" "myterraformgroup" {
     }
 }
 
+provider "azurerm" {
+   features {}
+}
+
 # Create virtual network
 resource "azurerm_virtual_network" "myterraformnetwork" {
     name                = "Sinergija19-vnet"
