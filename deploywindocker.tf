@@ -40,18 +40,18 @@ resource "azurerm_subnet" "myterraformsubnet" {
     address_prefixes       = ["10.0.1.0/24"]
 }
 
-// # Create public IPs
-// resource "azurerm_public_ip" "myterraformpublicip" {
-//     count =  "${var.countvalue}"
-//     name                         = "myPublicIP${count.index}"
-//     location                     = "westeurope"
-//     resource_group_name          = "${azurerm_resource_group.myterraformgroup.name}"
-//     allocation_method            = "Dynamic"
+# Create public IPs
+resource "azurerm_public_ip" "myterraformpublicip" {
+    count =  "${var.countvalue}"
+    name                         = "myPublicIP${count.index}"
+    location                     = "westeurope"
+    resource_group_name          = "${azurerm_resource_group.myterraformgroup.name}"
+    allocation_method            = "Dynamic"
 
-//     tags = {
-//         environment = "windocker lab"
-//     }
-// }
+    tags = {
+        environment = "windocker lab"
+    }
+}
 
 # Create Network Security Group and rule
 resource "azurerm_network_security_group" "myterraformnsg" {
