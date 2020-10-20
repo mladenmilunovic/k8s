@@ -1,126 +1,144 @@
-# Create a resource group if it doesn’t exist
-resource "azurerm_resource_group" "myterraformgroup" {
-    name     = "AzureWSSingleDockerHost"
-    location = "westeurope"
-
-    tags = {
-        environment = "AzureWS Demo"
-    }
+#specify number of instances as variable
+variable "countvalue" {
+    default = 3
+}
+variable "vmname" {
+    default = "server"
 }
 
 provider "azurerm" {
    features {}
 }
 
+# Create a resource group if it doesn’t exist
+resource "azurerm_resource_group" "myterraformgroup" {
+    name     = "paw_rg"
+    location = "westeurope"
+
+    tags = {
+        environment = "PAW lab"
+    }
+}
+
 # Create virtual network
 resource "azurerm_virtual_network" "myterraformnetwork" {
-    name                = "Sinergija19-vnet"
-    address_space       = ["10.0.0.0/24"]
+    name                = "PawVnet"
+    address_space       = ["10.0.0.0/16"]
     location            = "westeurope"
     resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
 
     tags = {
-        environment = "Terraform Demo"
+        environment = "PAW lab"
     }
 }
 
 # Create subnet
 resource "azurerm_subnet" "myterraformsubnet" {
-    name                 = "default"
+    name                 = "PawSubnet"
     resource_group_name  = "${azurerm_resource_group.myterraformgroup.name}"
     virtual_network_name = "${azurerm_virtual_network.myterraformnetwork.name}"
-    address_prefix       = "10.0.0.0/24"
+    address_prefixes       = ["10.0.1.0/24"]
 }
 
-# Create public IPs
-resource "azurerm_public_ip" "myterraformpublicip" {
-    name                         = "myPublicIP"
-    location                     = "westeurope"
-    resource_group_name          = "${azurerm_resource_group.myterraformgroup.name}"
-    allocation_method            = "Dynamic"
+// # Create public IPs
+// resource "azurerm_public_ip" "myterraformpublicip" {
+//     count =  "${var.countvalue}"
+//     name                         = "myPublicIP${count.index}"
+//     location                     = "westeurope"
+//     resource_group_name          = "${azurerm_resource_group.myterraformgroup.name}"
+//     allocation_method            = "Dynamic"
 
-    tags = {
-        environment = "Terraform Demo"
-    }
-}
+//     tags = {
+//         environment = "PAW lab"
+//     }
+// }
 
 # Create Network Security Group and rule
 resource "azurerm_network_security_group" "myterraformnsg" {
-    name                = "Server2016Docker-nsg"
+    name                = "PawNetworkSecurityGroup"
     location            = "westeurope"
     resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
     
-    security_rule {
-        name                       = "RDP"
-        priority                   = 1001
-        direction                  = "Inbound"
-        access                     = "Allow"
-        protocol                   = "Tcp"
-        source_port_range          = "*"
-        destination_port_range     = "3389"
-        source_address_prefix      = "*"
-        destination_address_prefix = "*"
-    }
-     
+    // security_rule {
+    //     name                       = "RDP"
+    //     priority                   = 1001
+    //     direction                  = "Inbound"
+    //     access                     = "Allow"
+    //     protocol                   = "Tcp"
+    //     source_port_range          = "*"
+    //     destination_port_range     = "3389"
+    //     source_address_prefix      = "*"
+    //     destination_address_prefix = "*"
+    // }
+
     tags = {
-        environment = "Terraform Demo"
+        environment = "PAW lab"
     }
+}
+
+#Associate NSG to subnet
+resource "azurerm_subnet_network_security_group_association" "mynsg" {
+  subnet_id                 = "${azurerm_subnet.myterraformsubnet.id}"
+  network_security_group_id = "${azurerm_network_security_group.myterraformnsg.id}"
 }
 
 # Create network interface
 resource "azurerm_network_interface" "myterraformnic" {
-    name                      = "Server2016DockerNIC"
+    count = "${var.countvalue}"
+    name                      = format("NIC-${var.vmname}%02d", count.index + 1) 
     location                  = "westeurope"
     resource_group_name       = "${azurerm_resource_group.myterraformgroup.name}"
-    network_security_group_id = "${azurerm_network_security_group.myterraformnsg.id}"
+    dns_servers                   = ["10.0.1.10"]
 
     ip_configuration {
-        name                          = "Server2016DockerNicConfiguration"
+        name                          = format("NicConfiguration-${var.vmname}%02d", count.index + 1)
         subnet_id                     = "${azurerm_subnet.myterraformsubnet.id}"
-        private_ip_address_allocation = "Dynamic"
-        public_ip_address_id          = "${azurerm_public_ip.myterraformpublicip.id}"
+        private_ip_address_allocation = "Static"
+        private_ip_address            = format("10.0.1.%02d", count.index + 21)
+        // public_ip_address_id          = "${element(azurerm_public_ip.myterraformpublicip.*.id, count.index)}"
     }
 
     tags = {
-        environment = "Terraform Demo"
+        environment = "PAW lab"
     }
 }
 
 # Generate random text for a unique storage account name
 resource "random_id" "randomId" {
     keepers = {
-        # Generate a new ID only when a new resource group is defined
-        resource_group = "${azurerm_resource_group.myterraformgroup.name}"
+        // # Generate a new ID only when a new resource group is defined
+        // resource_group = ${azurerm_resource_group.myterraformgroup.name}
+        resource_group_name         = "${azurerm_resource_group.myterraformgroup.name}"
     }
     
     byte_length = 8
 }
 
+# Create storage account for boot diagnostics 
 resource "azurerm_storage_account" "mystorageaccount" {
-    name                = "diag${random_id.randomId.hex}"
-    resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
-    location            = "westeurope"
-    account_replication_type = "LRS"
-    account_tier = "Standard"
+    name                        = "diag${random_id.randomId.hex}"
+    resource_group_name         = "${azurerm_resource_group.myterraformgroup.name}"
+    location                    = "westeurope"
+    account_tier                = "Standard"
+    account_replication_type    = "LRS"
 
     tags = {
-        environment = "Terraform Demo"
+        environment = "PAW lab"
     }
 }
 
 # Create virtual machine
 resource "azurerm_virtual_machine" "myterraformvm" {
-    name                  = "2016Docker"
+    count = "${var.countvalue}"
+    name                  = format("${var.vmname}%02d", count.index + 1)
     location              = "westeurope"
     resource_group_name   = "${azurerm_resource_group.myterraformgroup.name}"
-    network_interface_ids = ["${azurerm_network_interface.myterraformnic.id}"]
-    vm_size               = "Standard_D2S_v3"
-
-    delete_os_disk_on_termination = true
-    delete_data_disks_on_termination = true
+    network_interface_ids = ["${element(azurerm_network_interface.myterraformnic.*.id, count.index)}"]
+    vm_size               = "Standard_D2ds_v4"
+    // for exchange Standard_D4ds_v4
     
     storage_os_disk {
-        name              = "Server2016DockerOsDisk"
+        name              = format("OsDisk-${var.vmname}%02d", count.index + 1)
         caching           = "ReadWrite"
         create_option     = "FromImage"
         managed_disk_type = "Premium_LRS"
@@ -129,12 +147,13 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     storage_image_reference {
         publisher = "MicrosoftWindowsServer"
         offer     = "WindowsServer"
-        sku       = "2016-Datacenter-with-Containers"
+        sku       = "2019-datacenter-smalldisk-g2"
+        // Check file AzureSKU for more details
         version   = "latest"
     }
 
     os_profile {
-        computer_name  = "2016Docker"
+        computer_name  = format("${var.vmname}%02d", count.index + 1)
         admin_username = "mladen"
         admin_password = "P@ssw0rd1234"
     }
@@ -143,13 +162,13 @@ resource "azurerm_virtual_machine" "myterraformvm" {
         enable_automatic_upgrades = false
         provision_vm_agent = true
     }
-    
+
     boot_diagnostics {
-        enabled = "false"
+        enabled = "true"
         storage_uri = "${azurerm_storage_account.mystorageaccount.primary_blob_endpoint}"
-        }
+    }
 
     tags = {
-        environment = "Terraform Demo"
+        environment = "PAW lab"
     }
-}
+    }
