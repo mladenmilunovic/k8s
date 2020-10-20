@@ -88,13 +88,13 @@ resource "azurerm_network_interface" "myterraformnic" {
     name                      = format("NIC-${var.vmname}%02d", count.index + 1) 
     location                  = "westeurope"
     resource_group_name       = "${azurerm_resource_group.myterraformgroup.name}"
-    dns_servers                   = ["10.0.1.10"]
+    #dns_servers                   = ["10.0.1.10"]
 
     ip_configuration {
         name                          = format("NicConfiguration-${var.vmname}%02d", count.index + 1)
         subnet_id                     = "${azurerm_subnet.myterraformsubnet.id}"
         private_ip_address_allocation = "Static"
-        private_ip_address            = format("10.0.1.%02d", count.index + 21)
+        private_ip_address            = format("10.0.1.%02d", count.index + 11)
         // public_ip_address_id          = "${element(azurerm_public_ip.myterraformpublicip.*.id, count.index)}"
     }
 
