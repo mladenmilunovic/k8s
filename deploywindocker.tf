@@ -95,7 +95,7 @@ resource "azurerm_network_interface" "myterraformnic" {
         subnet_id                     = "${azurerm_subnet.myterraformsubnet.id}"
         private_ip_address_allocation = "Static"
         private_ip_address            = format("10.0.1.%02d", count.index + 11)
-        // public_ip_address_id          = "${element(azurerm_public_ip.myterraformpublicip.*.id, count.index)}"
+        public_ip_address_id          = "${element(azurerm_public_ip.myterraformpublicip.*.id, count.index)}"
     }
 
     tags = {
