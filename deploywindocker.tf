@@ -147,7 +147,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     storage_image_reference {
         publisher = "MicrosoftWindowsServer"
         offer     = "WindowsServer"
-        sku       = "2019-datacenter-smalldisk-g2"
+        sku       = "2019-datacenter-with-Containers"
         // Check file AzureSKU for more details
         version   = "latest"
     }
