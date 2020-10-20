@@ -3,7 +3,7 @@ variable "countvalue" {
     default = 3
 }
 variable "vmname" {
-    default = "server"
+    default = "windocker"
 }
 
 provider "azurerm" {
@@ -12,29 +12,29 @@ provider "azurerm" {
 
 # Create a resource group if it doesn’t exist
 resource "azurerm_resource_group" "myterraformgroup" {
-    name     = "paw_rg"
+    name     = "windocker_rg"
     location = "westeurope"
 
     tags = {
-        environment = "PAW lab"
+        environment = "windocker lab"
     }
 }
 
 # Create virtual network
 resource "azurerm_virtual_network" "myterraformnetwork" {
-    name                = "PawVnet"
+    name                = "windockerVnet"
     address_space       = ["10.0.0.0/16"]
     location            = "westeurope"
     resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
 
     tags = {
-        environment = "PAW lab"
+        environment = "windocker lab"
     }
 }
 
 # Create subnet
 resource "azurerm_subnet" "myterraformsubnet" {
-    name                 = "PawSubnet"
+    name                 = "windockerSubnet"
     resource_group_name  = "${azurerm_resource_group.myterraformgroup.name}"
     virtual_network_name = "${azurerm_virtual_network.myterraformnetwork.name}"
     address_prefixes       = ["10.0.1.0/24"]
@@ -49,30 +49,30 @@ resource "azurerm_subnet" "myterraformsubnet" {
 //     allocation_method            = "Dynamic"
 
 //     tags = {
-//         environment = "PAW lab"
+//         environment = "windocker lab"
 //     }
 // }
 
 # Create Network Security Group and rule
 resource "azurerm_network_security_group" "myterraformnsg" {
-    name                = "PawNetworkSecurityGroup"
+    name                = "windockerNetworkSecurityGroup"
     location            = "westeurope"
     resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
     
-    // security_rule {
-    //     name                       = "RDP"
-    //     priority                   = 1001
-    //     direction                  = "Inbound"
-    //     access                     = "Allow"
-    //     protocol                   = "Tcp"
-    //     source_port_range          = "*"
-    //     destination_port_range     = "3389"
-    //     source_address_prefix      = "*"
-    //     destination_address_prefix = "*"
-    // }
+    security_rule {
+        name                       = "RDP"
+        priority                   = 1001
+        direction                  = "Inbound"
+        access                     = "Allow"
+        protocol                   = "Tcp"
+        source_port_range          = "*"
+        destination_port_range     = "3389"
+        source_address_prefix      = "*"
+        destination_address_prefix = "*"
+    }
 
     tags = {
-        environment = "PAW lab"
+        environment = "windocker lab"
     }
 }
 
@@ -99,7 +99,7 @@ resource "azurerm_network_interface" "myterraformnic" {
     }
 
     tags = {
-        environment = "PAW lab"
+        environment = "windocker lab"
     }
 }
 
@@ -123,7 +123,7 @@ resource "azurerm_storage_account" "mystorageaccount" {
     account_replication_type    = "LRS"
 
     tags = {
-        environment = "PAW lab"
+        environment = "windocker lab"
     }
 }
 
@@ -169,6 +169,6 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     }
 
     tags = {
-        environment = "PAW lab"
+        environment = "windocker lab"
     }
     }
