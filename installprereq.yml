@@ -3,7 +3,7 @@
 # # performs yum update and reboots server
  - name: perform yum update / reboot server
    hosts: servers
-   remote_user: lnxcfg
+   remote_user: mladen
    become: true
    become_method: sudo
    become_user: root
